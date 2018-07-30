@@ -25,24 +25,24 @@ pip install xxx
 https://quant.gf.com.cn/api
 
 回测情况：
-时间   2010/1/4~2018/7/30
-总收益	523.04%
-策略年化收益	24.57%
-基准收益	-1.10%
-Alpha	0.213
-Beta	0.173
-Sharpe	0.850
-Sortino	1.109
-Information Ratio	0.805
-Algorithm Volatility	0.242
-Benchmark Volatility	0.233
-胜率	0.408
-日胜率	0.487
-盈亏比	2.534
-盈利次数	102
-亏损次数	148
-最大回撤	43.025%
-最大回撤出现时间	2015-06-02~2015-06-26
+时间：2010/1/4~2018/7/30
+总收益：523.04%
+策略年化收益：24.57%
+基准收益：-1.10%
+Alpha：0.213
+Beta：0.173
+Sharpe：0.850
+Sortino：1.109
+Information Ratio：0.805
+Algorithm Volatility：0.242
+Benchmark Volatility：0.233
+胜率：0.408
+日胜率：0.487
+盈亏比：2.534
+盈利次数：102
+亏损次数：148
+最大回撤：43.025%
+最大回撤出现时间：2015-06-02~2015-06-26
 
 时间复杂度：
 超过2100个交易日
