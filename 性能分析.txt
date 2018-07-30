@@ -1,0 +1,150 @@
+Timer unit: 1e-06 s
+
+Total time: 354.224 s
+File: /tmp/codejail/71/128871/tmp3u6l6c/user_code.py
+Function: training at line 29
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    29                                           def training(s,context):
+    30      6351         6558      1.0      0.0      pred = 0
+    31                                               # 获取某只股票的资金流数据
+    32      6351    270387502  42574.0     76.3      moneyflow = jqdata.get_money_flow(s,end_date = context.current_dt.date(),count=120)
+    33                                               
+    34                                               # 数据检查
+    35      6351        29545      4.7      0.0      if len(moneyflow)<25:
+    36       118          103      0.9      0.0          return 0
+    37                                               
+    38                                               # 为标准化做准备
+    39                                               #引入主力净额和主力净占比，标准化是防止出现拟合失败的问题
+    40      6233      1034086    165.9      0.3      amax = moneyflow['net_amount_main'].max()
+    41      6233       281387     45.1      0.1      amin = moneyflow['net_amount_main'].min()
+    42      6233       342477     54.9      0.1      amean = moneyflow['net_amount_main'].mean()
+    43      6233       358105     57.5      0.1      astd = moneyflow['net_amount_main'].std()
+    44                                           
+    45      6233       807417    129.5      0.2      pmax = moneyflow['net_pct_main'].max()
+    46      6233       245339     39.4      0.1      pmin = moneyflow['net_pct_main'].min()
+    47      6233       303462     48.7      0.1      pmean = moneyflow['net_pct_main'].mean()    
+    48      6233       333680     53.5      0.1      pstd = moneyflow['net_pct_main'].std()
+    49                                               
+    50      6233         7475      1.2      0.0      X = []
+    51      6233         5338      0.9      0.0      Y = []
+    52                                               
+    53      6233         5523      0.9      0.0      i = 4
+    54                                               
+    55                                               # 利用Max-Min标准化后的的数据做训练
+    56    652335      1653515      2.5      0.5      while i < len(moneyflow) - 5:
+    57                                                   
+    58    646102     11243729     17.4      3.2          if moneyflow['change_pct'][i] > 0.5:
+    59    285412       304761      1.1      0.1              Y.append(1)
+    60                                                   else:
+    61    360690       379169      1.1      0.1              Y.append(0)
+    62                                           
+    63    646102     10625314     16.4      3.0          x1 = (moneyflow['net_amount_main'][i-1] - amin) / (amax - amin)
+    64    646102     10535313     16.3      3.0          x2 = (moneyflow['net_amount_main'][i-2] - amin) / (amax - amin)
+    65    646102     10617227     16.4      3.0          x3 = moneyflow['change_pct'][i-1] / 10
+    66    646102     10614673     16.4      3.0          x4 = (moneyflow['net_pct_main'][i-1] - pmin) / (pmax - pmin)
+    67                                           
+    68    646102       836166      1.3      0.2          X.append([x1,x2,x3,x4])
+    69                                                   
+    70    646102       573895      0.9      0.2          i = i + 1
+    71                                               
+    72                                               # 利用sklearn模块进行SVM模型训练
+    73      6233       166261     26.7      0.0      clf = svm.SVC()
+    74      6233      6406627   1027.9      1.8      clf.fit(X, Y)  
+    75                                               
+    76                                               #预测
+    77      6233       242317     38.9      0.1      x1 = (moneyflow['net_amount_main'][len(moneyflow)-1] - amin) / (amax - amin)
+    78      6233       140858     22.6      0.0      x2 = (moneyflow['net_amount_main'][len(moneyflow)-2] - amin) / (amax - amin)
+    79      6233       127231     20.4      0.0      x3 = moneyflow['change_pct'][len(moneyflow)-1] / 10
+    80      6233       119605     19.2      0.0      x4 = (moneyflow['net_pct_main'][len(moneyflow)-1] - pmin) / (pmax - pmin)
+    81      6233         7844      1.3      0.0      X1 = [x1,x2,x3,x4]
+    82                                           
+    83      6233     15472587   2482.4      4.4      pred = clf.predict(X1)
+    84                                               
+    85      6233         8755      1.4      0.0      return pred
+
+Total time: 9.06265 s
+File: /tmp/codejail/71/128871/tmp3u6l6c/user_code.py
+Function: filter_paused_and_st_stock at line 90
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    90                                           def filter_paused_and_st_stock(stock_list):
+    91      2082       133664     64.2      1.5      current_data = get_current_data()
+    92    106182      4518777     42.6     49.9      return [stock for stock in stock_list if not current_data[stock].paused 
+    93     91035      3871582     42.5     42.7      and not current_data[stock].is_st and 'ST' not in current_data[stock].
+    94     90136       538631      6.0      5.9      name and '*' not in current_data[stock].name and '退' not in current_data[stock].name]
+
+Total time: 0.06978 s
+File: /tmp/codejail/71/128871/tmp3u6l6c/user_code.py
+Function: filter_gem_stock at line 97
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    97                                           def filter_gem_stock(context, stock_list):
+    98     92098        69780      0.8    100.0      return [stock for stock in stock_list  if stock[0:3] != '300']
+
+Total time: 1.58651 s
+File: /tmp/codejail/71/128871/tmp3u6l6c/user_code.py
+Function: filter_old_stock at line 101
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   101                                           def filter_old_stock(context, stock_list):
+   102      2082         1746      0.8      0.1      tmpList = []
+   103     37316        25596      0.7      1.6      for stock in stock_list :
+   104     35234      1520386     43.2     95.8          days_public=(context.current_dt.date() - get_security_info(stock).start_date).days
+   105                                                   # 上市超过1年
+   106     35234        25841      0.7      1.6          if days_public > 365:
+   107     11864        11739      1.0      0.7              tmpList.append(stock)
+   108      2082         1207      0.6      0.1      return tmpList
+
+Total time: 0 s
+File: /tmp/codejail/71/128871/tmp3u6l6c/user_code.py
+Function: filter_limit_stock at line 111
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   111                                           def filter_limit_stock(context, data, stock_list):
+   112                                               tmpList = []
+   113                                               curr_data = get_current_data()
+   114                                               for stock in stock_list:
+   115                                                   # 未涨停，也未跌停
+   116                                                   if curr_data[stock].low_limit < data[stock].close < curr_data[stock].high_limit:
+   117                                                       tmpList.append(stock)
+   118                                               return tmpList
+
+Total time: 6.65145 s
+File: /tmp/codejail/71/128871/tmp3u6l6c/user_code.py
+Function: stop at line 122
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   122                                           def stop(context):
+   123      3224      4415206   1369.5     66.4      Price = attribute_history('000300.XSHG',60,'1d', ['close'])
+   124      3224      1371173    425.3     20.6      ma30 = Price['close'][-30:-1].mean()
+   125      3224       858000    266.1     12.9      ma20 = Price['close'][-20:-1].mean()
+   126      3224         4590      1.4      0.1      if ma20 ma10:
+   174       399        23061     57.8      0.0                      price = Price['close'][-1]
+   175       399          843      2.1      0.0                      g.rise[s] = price
+   176                                                       # 如果预测为跌，卖出所持的该股票
+   177      5685     13342902   2347.0      3.0              elif predict == 0 and context.portfolio.positions[s].closeable_amount > 0:
+   178                                                           # 全部卖出
+   179        72       624263   8670.3      0.1                  order_target(s, 0)
+   180                                                           # 记录这次卖出
+   181        72       233187   3238.7      0.1                  log.info("Selling %s" % (s))
+   182                                               
+   183                                                   # 用所有可用 cash 买进买入池的股票
+   184      1142        50442     44.2      0.0          cash = context.portfolio.available_cash
+   185      1142        32422     28.4      0.0          total_price = sum(g.rise.values())
+   186      1142         2829      2.5      0.0          volume = cash/total_price
+   187                                           
+   188                                                   # 下单
+   189      1541         2764      1.8      0.0          for s in g.rise.keys(): #s是股票list的遍历
+   190       399      3992473  10006.2      0.9              order_target(s, volume)
+   191                                                       # 记录这次买入
+   192       399      1386193   3474.2      0.3              log.info("Buying %s" % (s))
+   193                                               
+   194                                               # 输出运行时间
+   195      2082      5410223   2598.6      1.2      log.info('函数运行时间(before_market_open)：'+str(context.current_dt.time()))
