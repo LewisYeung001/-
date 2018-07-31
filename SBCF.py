@@ -46,7 +46,7 @@ def training(s,context):
         return 0
     
     # 为标准化做准备
-    #引入主力净额和主力净占比，标准化是防止出现拟合失败的问题
+    # 引入主力净额和主力净占比，标准化是防止出现拟合失败的问题
     amax = moneyflow['net_amount_main'].max()
     amin = moneyflow['net_amount_main'].min()
     amean = moneyflow['net_amount_main'].mean()
@@ -94,7 +94,7 @@ def training(s,context):
     
     return pred
 
-## 选股
+## 构建股票池
 
 # 过滤ST、*ST和退市整理板股票
 def filter_paused_and_st_stock(stock_list):
@@ -127,20 +127,7 @@ def filter_limit_stock(context, data, stock_list):
             tmpList.append(stock)
     return tmpList
 
-
-# 止损函数，当沪深300指数的20日线下穿30日线时，卖出所有股票
-def stop(context):
-    Price = attribute_history('000300.XSHG',60,'1d', ['close'])
-    ma30 = Price['close'][-30:-1].mean()
-    ma20 = Price['close'][-20:-1].mean()
-    if ma20<ma30:
-        return False;
-    else:
-        return True
-
-
-
-# 选取流通市值小于100亿的30只股票
+# 筛选出股票池
 def select_stocks(context):
     # 选取流通市值小于100亿的100只股票
     q = query(valuation.code, valuation.circulating_market_cap).order_by(
@@ -159,6 +146,16 @@ def select_stocks(context):
     stock_list = stock_list[:30]  
     return stock_list
     
+## 止损函数，当沪深300指数的20日线下穿30日线时，卖出所有股票
+def stop(context):
+    Price = attribute_history('000300.XSHG',60,'1d', ['close'])
+    ma30 = Price['close'][-30:-1].mean()
+    ma20 = Price['close'][-20:-1].mean()
+    if ma20<ma30:
+        return False;
+    else:
+        return True
+    
 ## 交易
 def before_market_open(context):
     
@@ -176,7 +173,7 @@ def before_market_open(context):
         for s in g.df:
             predict = training(s,context)
             if predict == 1:
-                # 计算某只股票的5日、10日移动平均，金叉则放入买入池
+                # 预测为涨，则计算某只股票的5日、10日移动平均，金叉则放入买入池
                 Price = attribute_history(s,20,'1d', ['close'],skip_paused=False)
                 ma5 = Price['close'][-5:-1].mean()
                 ma10 = Price['close'][-10:-1].mean()
